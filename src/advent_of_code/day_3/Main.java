@@ -112,7 +112,6 @@ public class Main {
         return false;
     }
 
-
     private static void findGearRatio() {
         for (int r = 0; r < schematic.length; r++) {
             int rowSize = schematic[r].length;
@@ -123,186 +122,22 @@ public class Main {
 
                     //look right for digits
                     if (c + 1 < rowSize && Character.isDigit(schematic[r][c + 1])) {
-                        //extract sub list from c + 1 to end of row
-                        char[] subArr = Arrays.copyOfRange(schematic[r], c + 1, rowSize);
-
-                        StringBuilder num = new StringBuilder();
-                        for (char crrCh : subArr) {
-                            if (Character.isDigit(crrCh)) {
-                                num.append(crrCh);
-                            } else {
-                                break;
-                            }
-                        }
-
-                        nums.add(num.toString());
+                        nums.add(lookRight(r, c, rowSize));
                     }
 
                     //look left for digits
                     if (c - 1 >= 0 && Character.isDigit(schematic[r][c - 1])) {
-                        //extract sub list from c - 1 to start of row
-                        char[] subArr = Arrays.copyOfRange(schematic[r], 0, c);
-
-                        StringBuilder num = new StringBuilder();
-
-                        for (int i = subArr.length - 1; i >= 0; i--) {
-                            if (Character.isDigit(subArr[i])) {
-                                num.append(subArr[i]);
-                            } else {
-                                break;
-                            }
-                        }
-
-                        nums.add(num.reverse().toString());
+                        nums.add(lookLeft(r, c).reverse().toString());
                     }
 
                     //look up for digits
                     if (r - 1 >= 0) {
-                        char[] subArr = schematic[r - 1];
-                        StringBuilder num = new StringBuilder();
-
-                        boolean isNumDirectAbove = Character.isDigit(subArr[c]);
-
-                        if (isNumDirectAbove) {
-                            //if both are num start from left and add to right
-                            if (c - 1 >= 0 && c + 1 < subArr.length && Character.isDigit(subArr[c - 1]) && Character.isDigit(subArr[c + 1])) {
-                                for (int i = c - 1; i < subArr.length; i++) {
-                                    if (Character.isDigit(subArr[i])) {
-                                        num.append(subArr[i]);
-                                    } else {
-                                        break;
-                                    }
-                                }
-
-                                nums.add(num.toString());
-
-                            } else if (c - 1 >= 0 && !Character.isDigit(subArr[c - 1])) {//if to left is not num look and add to right
-                                for (int i = c; i < subArr.length; i++) {
-                                    if (Character.isDigit(subArr[i])) {
-                                        num.append(subArr[i]);
-                                    } else {
-                                        break;
-                                    }
-                                }
-
-                                nums.add(num.toString());
-                            } else if (c + 1 < subArr.length && !Character.isDigit(subArr[c + 1])) { //if to right is not num look and add to left
-                                for (int i = c; i >= 0; i--) {
-                                    if (Character.isDigit(subArr[i])) {
-                                        num.append(subArr[i]);
-                                    } else {
-                                        break;
-                                    }
-                                }
-
-                                nums.add(num.reverse().toString());
-                            }
-                        }
-
-                        num.delete(0, num.length());
-
-                        //look right for r - 1
-                        if (c + 1 < subArr.length && Character.isDigit(subArr[c + 1]) && !isNumDirectAbove) {
-                            for (int i = c + 1; i < subArr.length; i++) {
-                                if (Character.isDigit(subArr[i])) {
-                                    num.append(subArr[i]);
-                                } else {
-                                    break;
-                                }
-                            }
-
-                            nums.add(num.toString());
-                        }
-
-                        num.delete(0, num.length());
-                        //look left for r - 1
-                        if (c - 1 >= 0 && Character.isDigit(subArr[c - 1]) && !isNumDirectAbove) {
-                            for (int i = c - 1; i >= 0; i--) {
-                                if (Character.isDigit(subArr[i])) {
-                                    num.append(subArr[i]);
-                                } else {
-                                    break;
-                                }
-                            }
-
-                            nums.add(num.reverse().toString());
-                        }
-
+                        look(nums, r - 1, c);
                     }
 
                     //look down for digits
                     if (r + 1 < schematic.length) {
-                        //look right for r + 1
-                        char[] subArr = schematic[r + 1];
-
-                        StringBuilder num = new StringBuilder();
-                        boolean isNumDirectBottom = Character.isDigit(subArr[c]);
-
-                        //case when char direct on the bottom is num
-                        if (isNumDirectBottom) {
-                            //if both are num start from left and add to right
-                            if (c - 1 >= 0 && c + 1 < subArr.length && Character.isDigit(subArr[c - 1]) && Character.isDigit(subArr[c + 1])) {
-                                for (int i = c - 1; i < subArr.length; i++) {
-                                    if (Character.isDigit(subArr[i])) {
-                                        num.append(subArr[i]);
-                                    } else {
-                                        break;
-                                    }
-                                }
-
-                                nums.add(num.toString());
-
-                            } else if (c - 1 >= 0 && !Character.isDigit(subArr[c - 1])) {//if to left is not num look and add to right
-                                for (int i = c; i < subArr.length; i++) {
-                                    if (Character.isDigit(subArr[i])) {
-                                        num.append(subArr[i]);
-                                    } else {
-                                        break;
-                                    }
-                                }
-
-                                nums.add(num.toString());
-
-                            } else if (c + 1 < subArr.length && !Character.isDigit(subArr[c + 1])) { //if to right is not num look and add to left
-                                for (int i = c; i >= 0; i--) {
-                                    if (Character.isDigit(subArr[i])) {
-                                        num.append(subArr[i]);
-                                    } else {
-                                        break;
-                                    }
-                                }
-
-                                nums.add(num.reverse().toString());
-                            }
-                        }
-
-                        //case when the char which direct on the bottom is not num
-                        if (c + 1 < subArr.length && Character.isDigit(subArr[c + 1]) && !isNumDirectBottom) {
-                            for (int i = c + 1; i < subArr.length; i++) {
-                                if (Character.isDigit(subArr[i])) {
-                                    num.append(subArr[i]);
-                                } else {
-                                    break;
-                                }
-                            }
-
-                            nums.add(num.toString());
-                        }
-
-                        num.delete(0, num.length());
-
-                        //look left for r + 1
-                        if (c - 1 >= 0 && Character.isDigit(subArr[c - 1]) && !isNumDirectBottom) {
-                            for (int i = c - 1; i >= 0; i--) {
-                                if (Character.isDigit(subArr[i])) {
-                                    num.append(subArr[i]);
-                                } else {
-                                    break;
-                                }
-                            }
-
-                            nums.add(num.reverse().toString());
-                        }
+                        look(nums, r + 1, c);
                     }
 
                     if (nums.size() == 2) {
@@ -313,6 +148,90 @@ public class Main {
                     }
                 }
             }
+        }
+    }
+
+    private static String lookRight(int r, int c, int rowSize) {
+        char[] subArr = Arrays.copyOfRange(schematic[r], c + 1, rowSize);
+
+        StringBuilder num = new StringBuilder();
+
+        for (char crrCh : subArr) {
+            if (Character.isDigit(crrCh)) {
+                num.append(crrCh);
+            } else {
+                break;
+            }
+        }
+
+        return num.toString();
+    }
+
+    private static StringBuilder lookLeft(int r, int c) {
+        char[] subArr = Arrays.copyOfRange(schematic[r], 0, c);
+
+        StringBuilder num = new StringBuilder();
+
+        for (int i = subArr.length - 1; i >= 0; i--) {
+            if (Character.isDigit(subArr[i])) {
+                num.append(subArr[i]);
+            } else {
+                break;
+            }
+        }
+
+        return num;
+    }
+
+    private static void look(List<String> nums, int r, int c) {
+        char[] subArr = schematic[r];
+        boolean isNumDirect = Character.isDigit(subArr[c]);
+
+        //case when char direct on the bottom is num
+        if (isNumDirect) {
+            //if both are num start from left and add to right
+            if (c - 1 >= 0 && c + 1 < subArr.length && Character.isDigit(subArr[c - 1]) && Character.isDigit(subArr[c + 1])) {
+                iterate(nums, subArr, c - 1, subArr.length, false);
+            } else if (c - 1 >= 0 && !Character.isDigit(subArr[c - 1])) {//if to left is not num look and add to right
+                iterate(nums, subArr, c, subArr.length, false);
+            } else if (c + 1 < subArr.length && !Character.isDigit(subArr[c + 1])) {//if to right is not num look and add to left
+                iterate(nums, subArr, c, 0, true);
+            }
+        }
+
+        //look right for r + 1
+        if (c + 1 < subArr.length && Character.isDigit(subArr[c + 1]) && !isNumDirect) {
+            iterate(nums, subArr, c + 1, subArr.length, false);
+        }
+
+        //look left for r + 1
+        if (c - 1 >= 0 && Character.isDigit(subArr[c - 1]) && !isNumDirect) {
+            iterate(nums, subArr, c - 1, 0, true);
+        }
+    }
+
+    private static void iterate(List<String> nums, char[] subArr, int start, int until, boolean decrement) {
+        StringBuilder num = new StringBuilder();
+        if (decrement) {
+            for (int i = start; i >= until; i--) {
+                if (Character.isDigit(subArr[i])) {
+                    num.append(subArr[i]);
+                } else {
+                    break;
+                }
+            }
+
+            nums.add(num.reverse().toString());
+        } else {
+            for (int i = start; i < until; i++) {
+                if (Character.isDigit(subArr[i])) {
+                    num.append(subArr[i]);
+                } else {
+                    break;
+                }
+            }
+
+            nums.add(num.toString());
         }
     }
 }
