@@ -1,87 +1,69 @@
 package advent_of_code.day_4;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.*;
+
+import advent_of_code.util.Utilities;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class Main {
-    private static int points = 0;
-    private static final String filePath = String.format("%s/src/advent_of_code/day_4/input_1.txt", System.getProperty("user.dir"));
-    private static final List<String> Rinput = new ArrayList<>();
-    private static final HashMap<String, Integer> memo = new HashMap<>();
-    private static int recursionCalls = 0;
+    private static final String filePath = String.format("%s/src/advent_of_code/day_4/input_2.txt", System.getProperty("user.dir"));
+
     public static void main(String[] args) {
-        readCards();
-        calc(Rinput, 0);
-        System.out.println(points);
-        System.out.println(recursionCalls);
+        List<String> lines = Utilities.readLines(filePath);
+
+        List<Card> cards = lines.stream()
+                .map(Card::new)
+                .toList();
+
+        // Part 1
+        cards.stream()
+                .map(c -> c.cardPoints).
+                reduce(Integer::sum)
+                .ifPresent(System.out::println);
+
+        // Part 2
+        ArrayList<Card> copies = new ArrayList<>();
+        cards.forEach(c -> processCard(c, cards, copies));
+        System.out.println(copies.size());
     }
 
-    private static void readCards() {
-        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
-            String line;
-
-            while ((line = reader.readLine()) != null) {
-                Rinput.add(line);
-            }
-        } catch (IOException e) {
-            System.out.println("File not found");
+    static void processCard(Card card, List<Card> originalCards, List<Card> copies) {
+        copies.add(card);
+        for (int i = card.cardNumber; i < card.myWinningNumbers.size() + card.cardNumber; i++) {
+            processCard(originalCards.get(i), originalCards, copies);
         }
     }
 
-    private static void calc(List<String> input, int index) {
-        recursionCalls++;
-        for (int i = 0; i < input.size(); i++) {
-            String[] arr = input.get(i).split(":");
-            String card  = arr[0].trim();
-            String[] nums = arr[1].split("\\|");
-            int matches;
+    static class Card {
 
-            if(!memo.containsKey(card)){
-                int[] winningNums = extractNums(nums[0].trim().split(" "));
-                int[] myNums = extractNums(nums[1].trim().split(" "));
-                matches = calcPoints(winningNums, myNums);
-                memo.put(card, matches);
-            }else {
-                matches = memo.get(card);
-            }
+        int cardNumber;
+        List<Integer> winningNumbers;
+        List<Integer> myNumbers;
+        List<Integer> myWinningNumbers;
+        int cardPoints = 0;
 
-            if (matches == 0) {
-                System.out.println("returning");
-                return;
-            }
+        public Card(String input) {
+            String[] parts = input.split(":");
+            this.cardNumber = Integer.parseInt(parts[0].trim().split("\\s+")[1]);
 
-            List<String> subList = Rinput.subList(index + 1, index + matches + 1);
+            String[] numbersGroups = parts[1].trim().split("\\|");
+            winningNumbers = Arrays.stream(numbersGroups[0].trim().split("\\s+"))
+                    .map(Integer::parseInt)
+                    .toList();
 
-            calc(subList, index + 1);
-        }
-    }
+            myNumbers = Arrays.stream(numbersGroups[1].trim().split("\\s+"))
+                    .map(Integer::parseInt)
+                    .toList();
 
-    private static int[] extractNums(String[] arr) {
-        return Arrays.stream(arr).
-                filter(s -> !s.isEmpty())
-                .mapToInt(Integer::parseInt).toArray();
-    }
+            myWinningNumbers = myNumbers.stream()
+                    .filter(winningNumbers::contains)
+                    .toList();
 
-    private static int calcPoints(int[] winningNums, int[] myNums) {
-        int p = 0;
-        int matches = 0;
-        for (int winningNum : winningNums) {
-            for (int myNum : myNums) {
-                if (winningNum == myNum) {
-                    if (p == 0) {
-                        p = 1;
-                    } else {
-                        p += p;
-                    }
-                    matches++;
-                    break;
-                }
+            if (!myWinningNumbers.isEmpty()) {
+                cardPoints = (int) Math.pow(2, myWinningNumbers.size() - 1);
             }
         }
-
-        points += p;
-        return matches;
     }
 }
