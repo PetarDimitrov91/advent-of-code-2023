@@ -19,8 +19,8 @@ public class Main {
 
         // Part 1
         cards.stream()
-                .map(c -> c.cardPoints).
-                reduce(Integer::sum)
+                .map(c -> c.cardPoints)
+                .reduce(Integer::sum)
                 .ifPresent(System.out::println);
 
         // Part 2
